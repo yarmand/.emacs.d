@@ -1,0 +1,236 @@
+>require 'yaml'
+require 'forwardable'
+
+require_relative './plan/puppet'
+
+module Hadouken
+  class Plan
+    # TODO: self.create, calls configure_host_groups, make new private
+
+    attr_accessor :artifact, :data_center, :dry_run, :estimated_time, :history_path,
+                  :interactive, :name, :project_subfolder, :user
+    attr_writer   :archive_name, :curl_opts, :max_concurrent_hosts, :mons,
+                  :releases_to_keep, :root, :secretie_user, :sudo_user
+    attr_reader   :canary_deploy, :config_filename, :env, :secretie_util,
+                  :timestamp, :timestamp_forced
+
+    CURL_DEFAULT_DOWNLOAD_OPTS = 'ksSfl'
+    DEFAULT_MONITORS_LIST      = %w{ mon-001 }
+    MAX_CONCURRENT_HOSTS       = 1
+    RELEASES_TO_KEEP           = 10
+    TEMP_ROOT                  = '/opt/deploy_temp'
+
+    def initialize(opts = {})
+      @timestamp        = opts[:timestamp] || Time.now.utc.strftime("%Y%m%d%H%M%S")
+      @timestamp_forced = !!opts[:timestamp]
+      @env              = opts[:env]
+      @config_filename  = opts[:config_filename]
+      @secretie_util    = opts.fetch(:secretie_util) { Secretie::Util }
+      @canary_deploy    = opts.fetch(:canary_deploy, nil)
+    end
+
+    def puppet_command(opts = {})
+      Puppet.command(name, opts)
+    end
+
+    def production?
+      env =~ /^prod/
+    end
+
+    def require_timestamp!
+      raise 'you must specify a timestamp using --timestamp' unless timestamp_forced
+    end
+
+    def user
+      @user ||= :deploymacy
+    end
+
+    def secretie_user
+      @secretie_user ||= name
+    end
+
+    def sudo_user
+      @sudo_user ||= name
+    end
+
+    def curl_opts
+      @download_curl_opts || CURL_DEFAULT_DOWNLOAD_OPTS
+    end
+
+    def archive_name
+      @archive_name ||= name
+    end
+
+    def mons
+      @mons ||= DEFAULT_MONITORS_LIST
+    end
+
+    def releases_to_keep
+      @releases_to_keep ||= RELEASES_TO_KEEP
+    end
+
+    def root
+      @root ||= "/opt/#{name}"
+    end
+
+    def project_subfolder
+      @project_subfolder ||= name
+    end
+
+    def groups
+      @groups ||= Hadouken::Groups.new
+    end
+
+    def zones
+      groups.groups
+    end
+
+    def tasks
+      @tasks ||= Hadouken::Tasks.new(plan: self)
+    end
+
+    def data_centers
+      @data_centers ||= groups.data_centers
+    end
+
+    def logger
+      Hadouken.logger
+    end
+
+    def configure
+      @configure ||= Configure.new(plan: self)
+    end
+
+    def configure_host_groups
+      configure
+    end
+
+    def schedule_downtimes(duration = estimated_time)
+      downtimes(scheduling: true, duration: duration)
+      tasks.desc 'Stopping iwatch'
+      tasks.add 'sudo service iwatch stop ; true'
+    end
+
+    def delete_downtimes
+      downtimes(scheduling: false)
+      tasks.desc 'Starting iwatch'
+      tasks.add 'sudo service iwatch start ; true'
+    end
+
+    def package_download
+      tasks.desc "Downloading package"
+      tasks.add create_temp_root_cmd
+      tasks.add package_download_cmd, timeout: 120
+    end
+
+    def create_temp_root_cmd
+      "sudo /bin/bash -c 'mkdir -p #{TEMP_ROOT} && " +
+        "chmod 755 #{TEMP_ROOT} && " + # the service user will be able to traverse the folder to untar the archive.
+        "chown -R #{user} #{TEMP_ROOT}'"
+    end
+
+    def package_download_cmd
+      "sudo /bin/bash -c 'mkdir -p #{temp_path} && chown #{user} #{temp_path}' && " +
+        "/usr/bin/curl -#{curl_opts} '#{artifact.nexus_uri}' " +
+        "| /bin/tar -C #{temp_path} -#{expand_opts} -"
+    end
+
+    def package_extract(dir, compressed = true)
+      tasks.desc "Extracting package"
+      tasks.add package_extract_cmd(dir, compressed)
+    end
+
+    def package_extract_cmd(dir, compressed)
+      "cd #{dir} && #{as_sudo} /bin/tar #{extract_opts(compressed)} " +
+        "#{temp_path}/modules/#{project_subfolder}/files/#{archive_name}.#{extract_ext(compressed)}"
+    end
+
+    def merge_secrets
+      tasks.desc "Merging secrets"
+      remote_secret_recipe  = secretie_util.build_secrets_puppet_file(self, temp_path, secretie_user, env)
+      remote_sensible_files = secretie_util.upload_key_files(self, temp_path)
+      remote_sensible_files << remote_secret_recipe
+      secure_remote_file remote_sensible_files
+    end
+
+    def secure_remote_file(files)
+      files = Array(files)
+      files.each do |f|
+        tasks.add "chmod go-rwx #{f}"
+      end
+    end
+
+    def temp_path
+      @temp_path ||= "#{TEMP_ROOT}/#{project_subfolder}/#{timestamp}"
+    end
+
+    def remove_temp_dir
+      tasks.desc "Remove temp directory"
+      tasks.add "sudo rm -r #{temp_path}"
+    end
+
+    def dry_run?
+      !!@dry_run
+    end
+
+    def interactive?
+      !!@interactive
+    end
+
+    def as_sudo
+      "sudo -u #{sudo_user}"
+    end
+
+    def sudo_sh
+      "sudo su - #{sudo_user} -c"
+    end
+
+    def depth_first(max_hosts = max_concurrent_hosts, opts = {})
+      tasks.add Hadouken::Strategy::ByHost.
+        new(self, opts.merge(max_hosts: max_hosts, traversal: :depth))
+    end
+
+    def max_concurrent_hosts
+      @max_concurrent_hosts ||= MAX_CONCURRENT_HOSTS
+    end
+
+    def breadth_first(max_hosts = nil, opts = {})
+      tasks.add Hadouken::Strategy::ByHost.
+        new(self, opts.merge(max_hosts: max_hosts, traversal: :breadth))
+    end
+
+    def remove_old_releases(release_dir)
+      tasks.desc "Keeping the #{releases_to_keep} latest releases. Removing the rest."
+      tasks.add remove_releases_cmd(release_dir), timeout: 30
+    end
+
+    def remove_releases_cmd(release_dir)
+      "cd #{release_dir} && ls -t1 | tail -n +#{releases_to_keep + 1} | #{as_sudo} xargs rm -rf"
+    end
+
+    protected
+
+      def downtimes(opts = {})
+        data_centers.each do |dc|
+          mons.each do |mon|
+            downtime = Downtime.new(self, opts.merge({data_center: dc, mon: mon}))
+            downtime.insert_task(tasks)
+          end
+        end
+      end
+
+    private
+
+      def expand_opts
+        artifact.bzip? ? 'jxf' : 'zxf'
+      end
+
+      def extract_opts(compressed = true)
+        compressed ? '-zxf' : '-xf'
+      end
+
+      def extract_ext(compressed = true)
+        compressed ? 'tgz' : 'tar'
+      end
+  end
+end

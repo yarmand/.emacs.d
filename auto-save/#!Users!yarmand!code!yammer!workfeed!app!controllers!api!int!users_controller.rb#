@@ -1,0 +1,354 @@
+class Api::Int::UsersController < Api::Int::ApiController
+  # skip verify_client_authorisations for now, so that we can run it after security_context_skip
+  skip_before_filter :verify_client_authorisations
+  before_filter :security_context_skip
+  before_filter :verify_client_authorisations, :except => [:create_qa]
+
+  before_filter :get_user, :except => [:index, :bulk_find_by_emails, :by_email, :by_meta_user_id, :get_mugshot, :create_qa, :create_by_email]
+
+  def show
+    @user ? success_response : failure_response
+  end
+
+  def index
+    Metrics.increment('kill_candidate_users_by_emails')
+    return head :bad_request unless params[:emails]
+    users = get_canonical_users(params[:emails], params[:network_id])
+    if users.any?
+      render json: users
+    else
+      head :not_found
+    end[1;2D1;2C
+  end
+
+  def bulk_find_by_emails
+    return head :bad_request unless params[:emails]
+    users = get_canonical_users(params[:emails], params[:network_id])
+    if users.any?
+      render json: users
+    else
+      head :not_found
+    end
+  end
+
+  def by_email
+    @user1;2D = User.find_by_email(params[:email])
+    @user ? success_response : not_found_response
+  end
+
+  def by_meta_user_id
+    @user = User.find_by_meta_user_id(params[:id])
+    @user ? success_response : not_found_response
+  end
+
+  def create_qa
+    factory = ::Qa::UserFactory.new(params)
+    @user = factory.create
+
+    if(params.fetch(:no_tasks, false))
+      # Dismiss NUE tasks
+      @user.task_list.each do |task|
+        @user.meta_user.dismiss_task! task[:name]
+      end
+    end
+    state = params.fetch(:state, "pending").downcase
+    modes = params.fetch(:suppress, "").split(',').map(&:strip).map(&:to_sym)
+    case state
+    when "active"
+      QA::Silence.without(modes) do
+        @user.initial_activate!
+      end
+      success_response
+    when "suspended"
+      @user.suspend!
+      success_response
+    when "deleted"
+      @user.delete!
+      success_response
+    when "pending"
+      # Default user state is pending
+      success_response
+    else
+      failure_response("The user state #{state} is not recognized")
+    end
+  rescue => e
+    render :status => :bad_request, :text => e.message
+  end
+
+  def create_by_email
+    email = Email.new(params[:email])
+    domain = email.domain
+    network = Network.find_by_domain(domain)
+    meta_user_options = (params[:has_fake_email] == 'true') ? { has_fake_email: true } : {}
+
+    @user = if !network
+      User.create_by_email(email.address, meta_user_options)
+    elsif network.will_accept_email?(email.address)
+      User.create_by_email_and_network(email.address, network, meta_user_options)
+    end
+
+    if @user && @user.persisted?
+      EventLog.log_event('signup_acquisition', user_id: @user.id, acquisition_type: params[:acquisition_type] || 'other')
+      EventLog.log_event('signup_funnel', user_id: @user.id, funnel_type: params[:funnel_type] || 'other')
+      success_response
+    else
+      failure_response
+    end
+  end
+
+  def change_email
+    new_email  = params[:new_email].downcase
+    network_id = params[:network_id]
+    if new_email == @user.email
+      @response = {:failure_response => "same email"}
+      format_response(500)
+    else
+      Triage.email_change(@user.email, new_email, network_id)
+      new_email == @user.reload.email ? success_response : failure_response
+    end
+  end
+
+  def destroy_photo
+    @user.meta_user.remove_mugshot!
+    @user.meta_user.mugshot_id == nil ? success_response : failure_response
+  end
+
+  def activate
+    if @user.pending?
+      @user.initial_activate!
+    else
+      EventLogger.log_event(:activating_deleted_user, :user_id => @user.id) if @user.deleted?
+      @user.activate! unless @user.active?
+    end
+
+    @user.active? ? success_response : failure_response
+  end
+
+  def suspend
+    @user.suspend! unless @user.suspended?
+    @user.suspended? ? success_response : failure_response
+  end
+
+  def delete
+    @user.delete! unless @user.deleted?
+    @user.deleted? ? success_response : failure_response
+  end
+
+  def destroy_sessions
+    WorkfeedSession.destroy_all_for(@user.meta_user)
+    @user.meta_user.delete_all_oauth_tokens!
+    render nothing: true, status: :ok
+  end
+
+  def send_forgot_password_email
+    @user.send_forgot_password_email ? success_response : failure_response
+  end
+
+  def send_activation_email
+    @user.send_activation_email ? success_response : failure_response
+  end
+
+  def change_permalink
+    old_permalink = @user.permalink.downcase
+    @user.permalink = params[:new_permalink]
+    @user.save!
+    @user.reload.permalink != old_permalink ? success_response : failure_response
+  end
+
+  def make_admin
+    @user.add_role!(:admin)
+    @user.admin? ? success_response : failure_response
+  end
+
+  def revoke_admin
+    @user.remove_role!(:admin)
+    !@user.admin? ? success_response : failure_response
+  end
+
+  def make_verified_admin
+    @user.add_role!(:verified_admin)
+    @user.verified_admin? ? success_response : failure_response
+  end
+
+  def revoke_verified_admin
+    @user.remove_role!(:verified_admin)
+    !@user.verified_admin? ? success_response : failure_response
+  end
+
+  def make_supervisor_admin
+    @user.add_role!(:supervisor_admin)
+    @user.supervisor_admin? ? success_response : failure_response
+  end
+
+  def revoke_supervisor_admin
+    @user.remove_role!(:supervisor_admin)
+    !@user.supervisor_admin? ? success_response : failure_response
+  end
+
+  def make_guest
+    @user.permalink = "#{Email.new(@user.email).username}#{User::GUEST_PERMALINK_SUFFIX}"
+    @user.guest = true
+    @user.save
+    @user.invalidate_record_cache
+    @user.reload.guest? ? success_response : failure_response
+  end
+
+  def revoke_guest
+    @user.guest = false
+    @user.permalink = "#{Email.new(@user.email).username}"
+    @user.save
+    @user.invalidate_record_cache
+    !@user.reload.guest? ? success_response : failure_response
+  end
+
+  def unsubscribe_email
+    UnsubscribedEmail.create(:email => @user.email, :source => UnsubscribedEmail.sources('admin'))
+    UnsubscribedEmail.find_by_email(@user.email) ? success_response : failure_response
+  end
+
+  def subscribe_email
+    if unsub_email = UnsubscribedEmail.find_by_email(@user.email)
+      unsub_email.destroy
+    end
+    !UnsubscribedEmail.find_by_email(@user.email) ? success_response : failure_response
+  end
+
+  def get_mugshot
+    if @user = User.find_by_email(params[:email])
+      @response = {:mugshot_url => @user.mugshot_url}
+    else
+      @response = {:mugshot_url => 'https://mug0.assets-yammer.com/mugshot/images/no_photo.png'}
+    end
+    format_response
+  end
+
+  def home_network
+    network_id = params[:network_id].to_i
+    if new_canonical_user = User.find_by_email_and_network_id(@user.email, network_id)
+      @user.meta_user.canonical_user = new_canonical_user
+      @user.meta_user.save ? success_response : failure_response(@user.meta_user.errors)
+    else
+      failure_response("User does not exist in the requested network.")
+    end
+  end
+
+  def move_canonical_user
+    new_canonical_network_id = params[:new_canonical_network].to_i
+    new_canonical_network = Network.find(new_canonical_network_id)
+    new_canonical_user = UserMigration.move_canonical_user!(@user, new_canonical_network)
+
+    return failure_response unless @user.deleted?
+
+    @user = new_canonical_user
+    success_response
+  end
+
+  def create_external_network
+    failure_response("The user was not found") unless @user
+    if n = Network.create_community(:name => params[:name], :parent_creator => @user, :parent_network => @user.network)
+      n.with_security_context do
+        if u = n.users.first
+          u.activate!
+          @user = u
+        else
+          failure_response("There is no user in this network")
+        end
+      end
+      success_response
+    else
+      failure_response("The EN did not get created properly")
+    end
+  end
+
+  private
+
+  def security_context_skip
+    SecurityContext.skip
+  end
+
+  def verify_fit_with_reserved_networks
+    # Given network_id as param
+    if (network_id=params[:network_id].to_i) && network_id > 0
+      raise_non_reserved(network_id)
+      return # we are happy here no need for more check
+    end
+
+    # check email driven params
+    domain = Email.new(params[:email] || params[:new_email]).domain
+    if domain
+      network = Network.find_by_domain(domain)
+      if network
+        raise_non_reserved(network.id) if domain !~ Qa::UserFactory::ALLOWED_QA_NETWORK_DOMAINS
+        return # we are happy here no need for more check
+      else
+        raise RestrictedClientError.new(self,"Domain #{domain} can't be found.")
+      end
+    end
+
+    # the get_user can set a different user from current.
+    if get_user
+      raise_non_reserved(@user.network)
+      return
+    else
+      # check if network for current user.
+      raise_non_reserved(current_network) if current_network
+      return
+    end
+  end
+
+  def get_user
+    @user ||= User.find_by_id(params[:id])
+    if @user
+      return @user
+    else
+      return not_found_response
+    end
+  end
+
+  def get_canonical_users(emails, network_id = nil)
+    emails.each_with_object({}) do |email, users|
+      meta_user = MetaUser.find_by_email(email)
+      canonical_user = meta_user.try(:canonical_user)
+      if canonical_user && valid_canonical_user(canonical_user, network_id)
+        users[email] = canonical_user
+      end
+    end
+  end
+
+  def valid_canonical_user(canonical_user, network_id)
+    valid_user = !canonical_user.deleted?
+    valid_network = !canonical_user.network.disabled_or_deleted?
+    included_network = network_id.nil? || canonical_user.network_id == network_id.to_i
+    if !valid_network || !included_network
+      EventLog.log_event(:canonical_user_excluded, { :canonical_user_id => canonical_user.id })
+    end
+    valid_user && valid_network && included_network
+  end
+
+  def format_response(status = 200)
+    respond_to do |format|
+      format.json { render json: @response, status: status }
+    end
+  end
+
+  def success_response
+    @response = format_user
+    format_response
+  end
+
+  def not_found_response(note = 'User not found')
+    @response = {note: note}
+    format_response(404)
+  end
+
+  def failure_response(note = 'Internal Failure')
+    @response = {failure_response: note}
+    format_response(500)
+  end
+
+  def format_user
+    user_serializer = InternalApi::UserSerializer.new(@user, @client_application)
+    user_serializer.to_h
+  end
+
+end

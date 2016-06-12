@@ -1,0 +1,16 @@
+((("eval-region" .
+   [1 0 0 0 0 0 0 0 0 0 0])
+  ("t" .
+   [1])
+  ("project-find-file" .
+   [0 0 0 0 0 0 0 0 0 0 1 0 \.\.\.])
+  ("textmate" .
+   [0 0 0 0 0 0 0 1])
+  ("textmate-goto-file" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
+  ("textmate-goto-symbol" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
+  ("goto-line" .
+   [0 0 0 0 1 0 0 0 0])
+  ("comment-region" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 \.\.\.])))
