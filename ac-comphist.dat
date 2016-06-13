@@ -1,16 +1,30 @@
-((("eval-region" .
-   [1 0 0 0 0 0 0 0 0 0 0])
-  ("t" .
-   [1])
-  ("project-find-file" .
-   [0 0 0 0 0 0 0 0 0 0 1 0 \.\.\.])
-  ("textmate" .
-   [0 0 0 0 0 0 0 1])
-  ("textmate-goto-file" .
-   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
-  ("textmate-goto-symbol" .
-   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
+((("elscreen-kill" .
+   [1 0 0 0 0 0 0 0 0 0 0 1 0])
+  ("elscreen-create" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 2 0 0])
+  ("elscreen-find-file" .
+   [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0])
+  ("elscreen-previous" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0])
+  ("elscreen-next" .
+   [0 0 0 0 0 0 0 0 0 0 0 1 0])
+  ("elscreen" .
+   [0 0 0 2 2 0 0 0])
+  ("undo-tree-mode" .
+   [0 0 0 0 0 0 1 0 0 0 0 0 0 0])
+  ("comment-region" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 \.\.\.])
   ("goto-line" .
    [0 0 0 0 1 0 0 0 0])
-  ("comment-region" .
-   [0 0 0 0 0 0 0 0 0 1 0 0 \.\.\.])))
+  ("textmate-goto-symbol" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
+  ("textmate-goto-file" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 \.\.\.])
+  ("textmate" .
+   [0 0 0 0 0 0 0 1])
+  ("project-find-file" .
+   [0 0 0 0 0 0 0 0 0 0 1 0 \.\.\.])
+  ("t" .
+   [1])
+  ("eval-region" .
+   [1 0 0 0 0 0 0 0 0 0 0])))

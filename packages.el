@@ -198,4 +198,7 @@
 
 (elscreen-start)
 
-(undo-tree-mode)
+(undo-tree-mode 1)
+
+(require 'back-button)
+(back-button-mode 1)

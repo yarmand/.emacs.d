@@ -38,7 +38,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (elscreen undo-tree which-key go-mode zoom-window yaml-mode textmate smex rvm robe request rainbow-delimiters puppet-mode php-mode noflet multiple-cursors multi-term monokai-theme markdown-mode magit-filenotify kill-ring-search js2-mode jdee iy-go-to-char ido-vertical-mode fsharp-mode feature-mode expand-region enh-ruby-mode color-theme-solarized better-defaults ag ac-slime))))
+    (back-button elscreen undo-tree which-key go-mode zoom-window yaml-mode textmate smex rvm robe request rainbow-delimiters puppet-mode php-mode noflet multiple-cursors multi-term monokai-theme markdown-mode magit-filenotify kill-ring-search js2-mode jdee iy-go-to-char ido-vertical-mode fsharp-mode feature-mode expand-region enh-ruby-mode color-theme-solarized better-defaults ag ac-slime))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

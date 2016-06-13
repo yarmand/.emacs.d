@@ -8,8 +8,8 @@
 (windmove-default-keybindings)
 
 ;; frames keys
-(global-set-key (kbd "C-c ]") 'elscreen-next)
-(global-set-key (kbd "C-c [") 'elscreen-previous)
+(global-set-key (kbd "C-x ]") 'elscreen-next)
+(global-set-key (kbd "C-x [") 'elscreen-previous)
 (global-set-key (kbd "C-x t c") 'elscreen-create)
 (global-set-key (kbd "C-x t k") 'elscreen-kill)
 (defalias 'tabedit 'elscreen-find-file)
@@ -50,13 +50,15 @@
 ;;  ⌘RET - Insert Newline at Line's End
 ;;  ⌥⌘T - Reset File Cache (for Go to File)
 (global-set-key (kbd "C-p") 'textmate-goto-file)
-(global-set-key (kbd "C-c t") 'textmate-goto-symbol)
+(global-set-key (kbd "C-c s") 'textmate-goto-symbol)
 (global-set-key (kbd "C-c l") 'goto-line)
-(global-set-key (kbd "C-c C-c r") 'comment-region)
-(global-set-key (kbd "C-c C-c l") 'comment-line)
+(global-set-key (kbd "C-c C-c /") 'comment-line)
 
 (global-set-key (kbd "C-c z") 'zap-to-char)
 (global-set-key (kbd "C-c C-p C-p") 'eval-print-last-sexp)
+
+(global-set-key (kbd "C-o") 'vi-open-line-below)
+(global-set-key (kbd "C-c C-c o") 'vi-open-line-above)
 
 ;; easy spell check
 (global-set-key (kbd "<f9>") 'ispell-word)
@@ -76,6 +78,3 @@
     (when (consp word)
       (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
 (global-set-key (kbd "M-<f10>") 'my:flyspell-save-word)
-
-;; flipping buffers
-(global-set-key (kbd "C-x |") 'toggle-window-split)

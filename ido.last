@@ -2,7 +2,7 @@
 
 ;; ----- ido-last-directory-list -----
 (
- ("/Users/yarmand/OneDrive/" . "Yammer-vpn.visc/")
+ ("/Users/yarmand/OneDrive/" . "Pictures/")
  ("/Users/" . "yarmand/")
  ("/Users/yarmand/.emacs.d/" . "init.d/")
  ("/Users/yarmand/code/yammer/deployer/lib/" . "hadouken/")
@@ -12,17 +12,18 @@
  ("/Users/yarmand/Downloads/emacs.d.phil/" . "init.d/")
  ("/Users/yarmand/Downloads/" . "emacs.d.phil/")
  ("/Users/yarmand/code/" . "yammer/")
- ("/Users/yarmand/" . ".emacs.d.SAVE/")
+ ("/Users/yarmand/" . ".emacs.d/")
  ("/Users/yarmand/code/yammer/" . "deployer/")
 )
 
 ;; ----- ido-work-directory-list -----
 (
+ "/Users/yarmand/.emacs.d/"
+ #("/Users/yarmand/OneDrive/Pictures/" 15 17 (face ido-vertical-match-face))
  "/Users/yarmand/OneDrive/Yammer-vpn.visc/"
  "/Users/yarmand/.emacs.d.SAVE/"
  "/Users/yarmand/dotfiles/bin/"
  "/Users/yarmand/bin/"
- "/Users/yarmand/.emacs.d/"
  "/Users/yarmand/code/yammer/deployer/lib/"
  "/Users/yarmand/.emacs.d/init.d/"
  "/Users/yarmand/code/yammer/deployer/lib/hadouken/"
@@ -35,6 +36,8 @@
 
 ;; ----- ido-work-file-list -----
 (
+ "packages.el"
+ "copy_movver_errors_files.rb"
  "config.conf"
  "init.el"
  "goci-notify.sh"
@@ -43,22 +46,22 @@
  "hadouken.rb"
  "keybindings.el.bad"
  "my_funcs.el"
- "plan.rb"
- "admin_controller.rb"
 )
 
 ;; ----- ido-dir-file-cache -----
 (
- ("/Users/yarmand/OneDrive/Yammer-vpn.visc/" (22301 59783 0 0) "ta.key" "config.conf" "ca.crt" "../" "./")
+ ("/Users/yarmand/.emacs.d/" (22365 51558 0 0) "site-lisp/" "recentf" "packages.el" "org-clock-save.el" "init.el" "init.d/" "ido.last" "elpa/" "custom.el~" "custom.el" "backups/" "auto-save-list/" "auto-save/" "ac-comphist.dat" ".git/" "../" "./")
 
- ("/Users/yarmand/OneDrive/" (22365 49410 0 0) "Yammer-vpn.visc/" "vrdrive_transfert/" "Videos/" "Shared_Y_S/" "Public/" "Projects/" "Pictures/" "netflix_for_mario.command" "netflix.command" "Music/" "Microsoft/" "Kath-Tome2.final2.docx" "Icon
+ ("/Users/yarmand/" (22365 50629 0 0) "vpn/" "VirtualBox VMs/" "tmp/" "src/" "secrets.txt" "Samsung/" "redalert/" "Public/" "pubkey.key" "playground/" "Pictures/" "output.csv" "OneDrive - Microsoft/" "OneDrive/" "oh-my-zsh/" "Music/" "Movies/" "message.json" "mesos-deploy/" "Library/" "La cité de la peur, une comédie familiale - F 1994, Comédie.m4v" "jumphost.dm2.yammer.com" "init.params.json.actual" "id_rsa.pub" "Google Drive/" "go/" "ES-Ops-20150910.zip" "elixir/" "Dropbox/" "Downloads/" "dotfiles/" "Documents/" "Desktop/" "db_watcher_archive.log~" "db_watcher_archive.log" "Creative Cloud Files/" "code/" "bin/" "Applications/" "aa" ".zshrc" ".zshenv" ".zsh_history" ".zsh-update" ".zprofile" ".zpreztorc" ".zprezto/" ".zlogout" ".zlogin" ".zhistory" ".zcompdump.zwc" ".zcompdump-C02LN244FD59-5.0.8" ".zcompdump-C02LN244FD59-5.0.5" ".zcompdump" ".zcompcache/" ".Xauthority" ".wireshark/" ".webpair" ".vnc/" ".virtualenvs/" ".vimrc" ".viminfo" ".vim-fuf-data/" ".vim/" ".vifm/" ".vagrant.d/" ".Trash/" ".tokens~" ".tokens" ".tmux.conf" ".tmate.conf" ".swp" ".subversion/" ".ssh_agent_vars" ".ssh/" ".sqlite_history" ".sonic-pi/" ".smex-items" ".shoes/" ".rubies/" ".rnd" ".puppetlabs/" ".puppet/" ".pry_history" ".oracle_jre_usage/" ".oh-my-zsh/" ".npm/" ".node-gyp/" ".nix-profile/" ".nix-defexpr/" ".nix-channels" ".nintiotp" ".ninti.yaml~" ".ninti.yaml" ".ngrok2/" ".netrc" ".NERDTreeBookmarks" ".mplayer/" ".m2/" ".local/" ".links/" ".lesshst" ".ipython/" ".inkscape-etc/" ".init.params.json.actual" ".IdeaIC15/" ".htoprc" ".homebrew_analytics_user_uuid" ".heroku/" ".Guardfile" ".guard_history" ".gpg-agent-info" ".gnupg/" ".gnome2/" ".gitignore_global" ".gitconfig" ".gitbook/" ".gemrc" ".gem/" ".emacs.d.SAVE/" ".emacs.d/" ".DS_Store" ".dropbox/" ".docker/" ".current_auth_sock" ".cups/" ".cpan/" ".config/" ".cache/" ".bzr.log" ".bundle/" ".bash_history" ".azure/" ".ApacheDirectoryStudio/" ".ansible/" ".android/" ".adobe/" ".ackrc" "../" "./")
+
+ ("/Users/yarmand/OneDrive/Pictures/" (22365 50615 0 0) "tiff/" "scans/" "Samples/" "MoverLogCgMbbRwdtaYm4JT2z9X1nziw.csv" "LR_Presets/" "in_progress/" "developed/" "copy_movver_errors_files.rb" ".DS_Store" "../" "./")
+
+ ("/Users/yarmand/.emacs.d/init.d/" (22364 32484 0 0) "my_funcs.el" "keybindings.el" "../" "./")
+
+ ("/Users/yarmand/OneDrive/" (22365 49586 0 0) "Yammer-vpn.visc/" "vrdrive_transfert/" "Videos/" "Shared_Y_S/" "Public/" "Projects/" "Pictures/" "netflix_for_mario.command" "netflix.command" "Music/" "Microsoft/" "Kath-Tome2.final2.docx" "Icon
 " "Documents/" "config.ovpn" ".DS_Store" "../" "./")
 
- ("/Users/yarmand/" (22364 31023 0 0) "vpn/" "VirtualBox VMs/" "tmp/" "src/" "secrets.txt" "Samsung/" "redalert/" "Public/" "pubkey.key" "playground/" "Pictures/" "output.csv" "OneDrive - Microsoft/" "OneDrive/" "oh-my-zsh/" "Music/" "Movies/" "message.json" "mesos-deploy/" "Library/" "La cité de la peur, une comédie familiale - F 1994, Comédie.m4v" "jumphost.dm2.yammer.com" "init.params.json.actual" "id_rsa.pub" "Google Drive/" "go/" "ES-Ops-20150910.zip" "elixir/" "Dropbox/" "Downloads/" "dotfiles/" "Documents/" "Desktop/" "db_watcher_archive.log~" "db_watcher_archive.log" "Creative Cloud Files/" "code/" "bin/" "Applications/" "aa" ".zshrc" ".zshenv" ".zsh_history" ".zsh-update" ".zprofile" ".zpreztorc" ".zprezto/" ".zlogout" ".zlogin" ".zhistory" ".zcompdump.zwc" ".zcompdump-C02LN244FD59-5.0.8" ".zcompdump-C02LN244FD59-5.0.5" ".zcompdump" ".zcompcache/" ".Xauthority" ".wireshark/" ".webpair" ".vnc/" ".virtualenvs/" ".vimrc" ".viminfo" ".vim-fuf-data/" ".vim/" ".vifm/" ".vagrant.d/" ".Trash/" ".tokens~" ".tokens" ".tmux.conf" ".tmate.conf" ".swp" ".subversion/" ".ssh_agent_vars" ".ssh/" ".sqlite_history" ".sonic-pi/" ".smex-items" ".shoes/" ".rubies/" ".rnd" ".puppetlabs/" ".puppet/" ".pry_history" ".oracle_jre_usage/" ".oh-my-zsh/" ".npm/" ".node-gyp/" ".nix-profile/" ".nix-defexpr/" ".nix-channels" ".nintiotp" ".ninti.yaml~" ".ninti.yaml" ".ngrok2/" ".netrc" ".NERDTreeBookmarks" ".mplayer/" ".m2/" ".local/" ".links/" ".lesshst" ".ipython/" ".inkscape-etc/" ".init.params.json.actual" ".IdeaIC15/" ".htoprc" ".homebrew_analytics_user_uuid" ".heroku/" ".Guardfile" ".guard_history" ".gpg-agent-info" ".gnupg/" ".gnome2/" ".gitignore_global" ".gitconfig" ".gitbook/" ".gemrc" ".gem/" ".emacs.d.SAVE/" ".emacs.d/" ".DS_Store" ".dropbox/" ".docker/" ".current_auth_sock" ".cups/" ".cpan/" ".config/" ".cache/" ".bzr.log" ".bundle/" ".bash_history" ".azure/" ".ApacheDirectoryStudio/" ".ansible/" ".android/" ".adobe/" ".ackrc" "../" "./")
-
- ("/Users/yarmand/.emacs.d/" (22364 31008 0 0) "site-lisp/" "recentf" "packages.el" "org-clock-save.el" "init.el" "init.d/" "ido.last" "elpa/" "custom.el~" "custom.el" "backups/" "auto-save-list/" "auto-save/" "ac-comphist.dat" ".git/" "../" "./")
-
- ("/Users/yarmand/.emacs.d/init.d/" (22364 30749 0 0) "my_funcs.el" "keybindings.el" "../" "./")
+ ("/Users/yarmand/OneDrive/Yammer-vpn.visc/" (22301 59783 0 0) "ta.key" "config.conf" "ca.crt" "../" "./")
 
  ("/Users/yarmand/dotfiles/bin/" (22349 45983 0 0) "X11auth.sh" "wfsync.sh" "urlencode" "urldecode" "UnixToWin.sh" "tw" "trowel.pl" "tm.save" "tm" "synergys" "synergyc" "synergy.sh" "synergy.conf" "switch-Branch.sh" "subl" "ssh_start_agent" "rmssh" "restart_webs.sh" "recreate_workfeed_ctags.sh" "rebar3" "onepasswordpy/" "ninti" "ngrok" "ng_server" "md" "loan.rb" "jscp.sh" "goci.sh" "goci-notify.sh" "git-twdiff.sh" "desc_to_test_name.rb" "deep_copy.rb" "cleanup-workfeed.sh" "chromedriver" "Accents2HTML.sh" ".jscp.sh.swp" "../" "./")
 
