@@ -115,6 +115,10 @@
 (add-to-list 'ac-modes 'web-mode)
 (add-to-list 'ac-modes 'enh-ruby-mode)
 
+(global-auto-complete-mode 1)
+(global-set-key (kbd "C-x i") 'auto-complete-mode)
+(global-set-key (kbd "C-i") 'auto-complete)
+
 ;; (add-hook 'ruby-mode-hook 'robe-mode)
 ;; (add-hook 'enh-ruby-mode-hook 'robe-mode)
 ;; (add-hook 'robe-mode-hook 'ac-robe-setup)

@@ -30,6 +30,7 @@
 ;; make sure we always have find-tag available as some modes overwrite the default M-.
 (global-set-key (kbd "C-c .") 'find-tag)
 (global-set-key (kbd "C-c C-c t") 'compile-tags)
+(global-set-key (kbd "M-o") 'pop-tag-mark)
 
 
 ;; compile
