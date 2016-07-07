@@ -5,3 +5,5 @@ archive-contents
 ido.last
 recentf
 tramp
+semanticdb
+*.elc
